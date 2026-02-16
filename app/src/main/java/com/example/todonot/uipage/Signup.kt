@@ -5,6 +5,7 @@ import android.graphics.Paint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -40,9 +42,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.todonot.R
+import com.example.todonot.navigation.Screen
+import com.example.todonot.viewmodel.AuthViewModel
 
 @Composable
 fun Sinup(navController: NavHostController) {
@@ -52,14 +57,27 @@ fun Sinup(navController: NavHostController) {
     SideEffect {
         val window = (view.context as Activity).window
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        WindowInsetsControllerCompat(window, view)
-            .hide(WindowInsetsCompat.Type.statusBars())
+        WindowInsetsControllerCompat(window, view).hide(WindowInsetsCompat.Type.statusBars())
     }
+
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val viewModel: AuthViewModel = viewModel()
+
+
+    // show err
+    val authState by viewModel.authState.collectAsState()
+
+
+
+
+
+
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .background(color = Color.White)
     ) {
 
@@ -72,25 +90,22 @@ fun Sinup(navController: NavHostController) {
         ) {
 
 
-
-
             Image(
                 painter = painterResource(id = R.drawable.img),
                 contentDescription = "Background Image",
-                modifier = Modifier.
-                size(100.dp)
+                modifier = Modifier
+                    .size(100.dp)
                     .clip(CircleShape)
                     .border(
-                        width = 3.dp,
-                        color = Color.Black,
-                        shape = (CircleShape)
+                        width = 3.dp, color = Color.Black, shape = (CircleShape)
 
                     )
 
             )
             Spacer(modifier = Modifier.height(30.dp))
 
-            Text(text = "Login",
+            Text(
+                text = "Login",
                 fontSize = 35.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black
@@ -101,9 +116,10 @@ fun Sinup(navController: NavHostController) {
 
             OutlinedTextField(
                 value = email,
-                onValueChange = {email=it},
-                label = {Text("Inpur Email")},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                onValueChange = { email = it },
+                label = { Text("Inpur Email", color =Color.Black) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                textStyle = LocalTextStyle.current.copy(color = Color.Black) // or any colo
             )
 
 
@@ -112,14 +128,16 @@ fun Sinup(navController: NavHostController) {
 
             OutlinedTextField(
                 value = password,
-                onValueChange = {password=it},
-                label = {Text("Inpur Password", color = Color.Black)},
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                onValueChange = { password = it },
+                label = { Text("Inpur Password", color = Color.Black) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                textStyle = LocalTextStyle.current.copy(color = Color.Black)
             )
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            Text(text = "Forgot Password",
+            Text(
+                text = "Forgot Password",
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.Black,
@@ -131,23 +149,49 @@ fun Sinup(navController: NavHostController) {
             )
 
             Spacer(modifier = Modifier.height(30.dp))
+
+
             Button(
                 onClick = {
+
+                    viewModel.signUp(email, password)
+
 
                 },
                 modifier = Modifier
                     .height(50.dp)
-                    .width(200.dp)
-
-                ,
-                shape = RoundedCornerShape(10.dp)
+                    .width(200.dp),
+                shape = RoundedCornerShape(10.dp),
+//                enabled = email.isNotBlank() && password.isNotBlank()
 
             ) {
 
-                Text("Login")
+                Text(
+                    text = "SinUP",
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black,
+
+                )
             }
 
-        }}
+
+        }
+
+
+    }
+
+
+    // 🔹 Navigate after successful signup
+    LaunchedEffect(authState) {
+        if (authState == "Register Success") {
+            navController.navigate(Screen.Login.route) {
+                popUpTo(Screen.Sinup.route) { inclusive = true }
+            }
+        }
+    }
+
+
 }
 
 

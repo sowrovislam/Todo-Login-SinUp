@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -36,15 +37,26 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.todonot.R
+import com.example.todonot.navigation.Screen
+import com.example.todonot.viewmodel.AuthViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun Login(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+   val viewModel: AuthViewModel= viewModel()
+
+// show err
+    val authState by viewModel.authState.collectAsState()
+
+
+
 
     val systemUiController =rememberSystemUiController()
 
@@ -116,6 +128,7 @@ fun Login(navController: NavHostController) {
 
 
                 OutlinedTextField(
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Inpur Email", color = Color.Black) },
@@ -126,10 +139,12 @@ fun Login(navController: NavHostController) {
 
 
                 OutlinedTextField(
+                    textStyle = LocalTextStyle.current.copy(color = Color.Black),
                     value = password,
                     onValueChange = { password = it },
                     label = { Text(
                         "Inpur Password",
+                        color =Color.Black
 
 
                     )
@@ -159,6 +174,12 @@ fun Login(navController: NavHostController) {
                 Button(
                     onClick = {
 
+
+                        viewModel.Login(email,password)
+
+
+
+
                     },
                     modifier = Modifier
                         .height(50.dp)
@@ -181,7 +202,7 @@ fun Login(navController: NavHostController) {
                     color = Color.Black,
                     modifier = Modifier
                         .clickable{
-                            navController.navigate("sinup")
+                            navController.navigate("Sinup")
                         }
 
                 )
@@ -189,7 +210,19 @@ fun Login(navController: NavHostController) {
 
             }
         }
+
+
     }
+    LaunchedEffect(authState) {
+        if (authState == "Login Success") {
+            navController.navigate(Screen.MainWork.route) {
+                popUpTo(Screen.Login.route) { inclusive = true }
+            }
+        }
+    }
+
+
+
 
 }
 

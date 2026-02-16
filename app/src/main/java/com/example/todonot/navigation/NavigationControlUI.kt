@@ -8,18 +8,24 @@ import androidx.navigation.compose.rememberNavController
 import com.example.todonot.uipage.Home
 import com.example.todonot.uipage.Login
 
+
+import com.example.todonot.uipage.MainWork
+
 import com.example.todonot.uipage.Sinup
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun NavigationControlUI() {
 
 
     val navController = rememberNavController()
+    val auth = FirebaseAuth.getInstance()
 
 
     NavHost(
         navController = navController,
-        startDestination = "Home"
+        startDestination = if (auth.currentUser != null) "MainWork" else "Home"
+
     ) {
         composable (Screen.Home.route){
 
@@ -36,8 +42,14 @@ fun NavigationControlUI() {
 
         }
 
-        composable(Screen.sinup.route) {
+        composable(Screen.Sinup.route) {
             Sinup(navController)
+
+
+        }
+
+        composable(Screen.MainWork.route) {
+            MainWork(navController)
 
 
         }
@@ -53,7 +65,7 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Login : Screen("login")
 
-    object  sinup: Screen("Sinup")
+    object  Sinup: Screen("Sinup")
 
-    object Page : Screen("Page")
+    object MainWork : Screen("MainWork")
 }
